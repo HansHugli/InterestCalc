@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<!-- saved from url=(0077)file:///C:/Users/hans_.ULTIMATE/Downloads/compound_interest_theme_toggle.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compound Interest — Inflation &amp; Tax Brackets</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; transition: background 0.2s, color 0.2s; }
+    body.dark  { background: #111110; color: #e8e6e0; }
+    body.light { background: #f9f9f7; color: #111; }
+
+    .card {
+      max-width: 760px; margin: 0 auto; padding: 1.5rem;
+      border-radius: 12px; margin-top: 2rem; margin-bottom: 2rem;
+    }
+    body.dark  .card { background: #161614; border: 0.5px solid #2a2a27; }
+    body.light .card { background: #fff;     border: 0.5px solid rgba(0,0,0,0.10); }
+
+    /* theme tokens via class on body */
+    body.dark  { --bg2:#1e1d1a; --bg3:#2a2a27; --border:rgba(255,255,255,0.08); --border2:#3a3a38; --text:#e8e6e0; --text2:#9a9890; --text3:#6b6960; --accent-inf:#c8843a; --accent-inc:#c05050; }
+    body.light { --bg2:#f5f5f3; --bg3:#ebebea; --border:rgba(0,0,0,0.10); --border2:rgba(0,0,0,0.15); --text:#111;    --text2:#666;    --text3:#999;    --accent-inf:#B87333; --accent-inc:#A32D2D; }
+
+    .top-bar { display: flex; justify-content: flex-end; margin-bottom: 1.25rem; }
+    .toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); }
+    .toggle { position: relative; width: 40px; height: 22px; cursor: pointer; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track { position: absolute; inset: 0; background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 11px; transition: background 0.2s; }
+    .toggle input:checked + .toggle-track { background: #3266ad; border-color: #3266ad; }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: var(--text2); border-radius: 50%; transition: transform 0.2s, background 0.2s; pointer-events: none; }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); background: #fff; }
+
+    .controls { display: grid; gap: 12px; margin-bottom: 1.25rem; }
+    .ctrl { display: flex; align-items: center; gap: 12px; }
+    .ctrl-label { font-size: 13px; color: var(--text2); width: 155px; flex-shrink: 0; }
+    .ctrl input[type=range] { flex: 1; }
+    .ctrl-val { font-size: 13px; font-weight: 500; color: var(--text); min-width: 80px; text-align: right; }
+    .section-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .section-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .pbtn { font-size: 11px; padding: 3px 9px; border-radius: 8px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; }
+    .pbtn:hover { background: var(--bg3); color: var(--text); }
+    .filing-tabs { display: flex; gap: 6px; }
+    .ftab { font-size: 12px; padding: 4px 12px; border-radius: 8px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; }
+    .ftab.active { background: var(--bg3); color: var(--text); border-color: var(--border2); font-weight: 500; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-bottom: 1.25rem; }
+    .stat { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .stat-lbl { font-size: 11px; color: var(--text3); margin-bottom: 3px; line-height: 1.3; }
+    .stat-val { font-size: 16px; font-weight: 500; }
+    .bracket-bar { display: flex; border-radius: 6px; overflow: hidden; height: 28px; margin-bottom: 8px; }
+    .bracket-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; overflow: hidden; white-space: nowrap; padding: 0 4px; }
+    .bracket-detail { font-size: 12px; color: var(--text3); line-height: 1.6; margin-top: 4px; }
+    .bracket-detail strong { color: var(--text2); }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 8px; font-size: 12px; color: var(--text2); }
+    .leg-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+    .chart-wrap { position: relative; width: 100%; height: 280px; }
+
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .card { margin: 1rem; padding: 1rem; }
+    }
+  </style>
+</head>
+<body class="dark">
+<div class="card">
+
+  <div class="top-bar">
+    <div class="toggle-wrap">
+      <span>Light</span>
+      <label class="toggle">
+        <input type="checkbox" id="themeToggle" checked="">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span>Dark</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <span class="ctrl-label">Starting amount</span>
+      <input type="range" id="principal" min="1000" max="100000" step="1000" value="10000">
+      <span class="ctrl-val" id="principalVal">$10,000</span>
+    </div>
+    <div class="ctrl">
+      <span class="ctrl-label">Annual return</span>
+      <input type="range" id="rate" min="1" max="20" step="0.5" value="7">
+      <span class="ctrl-val" id="rateVal">7%</span>
+    </div>
+    <div class="ctrl">
+      <span class="ctrl-label">Years</span>
+      <input type="range" id="years" min="1" max="50" step="1" value="20">
+      <span class="ctrl-val" id="yearsVal">20 yrs</span>
+    </div>
+    <div class="ctrl">
+      <span class="ctrl-label">Monthly contribution</span>
+      <input type="range" id="monthly" min="0" max="2000" step="50" value="0">
+      <span class="ctrl-val" id="monthlyVal">$0</span>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-top:4px;">Inflation</div>
+      <div class="presets">
+        <button class="pbtn" onclick="setSlider(&#39;inflation&#39;,2.0)">Fed target (2%)</button>
+        <button class="pbtn" onclick="setSlider(&#39;inflation&#39;,2.4)">Current (2.4%)</button>
+        <button class="pbtn" onclick="setSlider(&#39;inflation&#39;,3.1)">Long-run avg (3.1%)</button>
+        <button class="pbtn" onclick="setSlider(&#39;inflation&#39;,8.0)">2022 peak (8%)</button>
+      </div>
+      <div class="section-box">
+        <div class="ctrl">
+          <span class="ctrl-label" style="color:var(--accent-inf);">Inflation rate</span>
+          <input type="range" id="inflation" min="0" max="10" step="0.1" value="3.1" style="accent-color:var(--accent-inf);">
+          <span class="ctrl-val" id="inflationVal" style="color:var(--accent-inf);">3.1%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-box">
+      <div class="section-label">Capital gains tax — 2026 brackets</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text2);">Filing status:</span>
+        <div class="filing-tabs">
+          <button class="ftab active" id="tab-single" onclick="setFiling(&#39;single&#39;)">Single</button>
+          <button class="ftab" id="tab-mfj" onclick="setFiling(&#39;mfj&#39;)">Married filing jointly</button>
+        </div>
+      </div>
+      <div class="ctrl">
+        <span class="ctrl-label" style="color:var(--accent-inc);">Annual income</span>
+        <input type="range" id="income" min="0" max="700000" step="5000" value="300000" style="accent-color:var(--accent-inc);">
+        <span class="ctrl-val" id="incomeVal" style="color:var(--accent-inc);">$300K</span>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="bracket-bar" id="bracketBar"><div class="bracket-seg" style="flex:7.1;background:#1a5c3a;opacity:0.45;color:#6ddba0;"></div><div class="bracket-seg" style="flex:70.9;background:#1a3a6a;opacity:1;color:#8ab8f0;">15% LTCG</div><div class="bracket-seg" style="flex:22.1;background:#5c1a1a;opacity:0.22;color:#f08a8a;">20% LTCG</div></div>
+        <div class="bracket-detail" id="bracketDetail">Income $300K: <strong>15% long-term capital gains</strong> ($49,450–$545,500) + <strong>3.8% NIIT</strong> (income &gt; $200K) = <strong>18.8% effective</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-lbl">Nominal balance</div><div class="stat-val" id="sNominal" style="color:#5a8fd4;">$38,697</div></div>
+    <div class="stat"><div class="stat-lbl">After-tax balance</div><div class="stat-val" id="sAfterTax" style="color:var(--text);">$33,302</div></div>
+    <div class="stat"><div class="stat-lbl">Real after-tax value</div><div class="stat-val" id="sReal" style="color:#3daa80;">$18,084</div></div>
+    <div class="stat"><div class="stat-lbl">Tax + inflation drag</div><div class="stat-val" id="sDrag" style="color:#c05050;">$20,613</div></div>
+  </div>
+
+  <div class="legend">
+    <span><span class="leg-dot" style="background:#5a8fd4;"></span>Nominal balance</span>
+    <span><span class="leg-dot" style="background:#888;border:0.5px dashed #aaa;"></span>After-tax nominal</span>
+    <span><span class="leg-dot" style="background:#3daa80;"></span>Real after-tax</span>
+    <span><span class="leg-dot" style="background:#7a9ab8;border:0.5px dashed #9ab8d8;"></span>Amount invested</span>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="ciChart" width="1066" height="420" style="display: block; box-sizing: border-box; height: 280px; width: 710px;"></canvas>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  let chart, filing = 'single', isDark = true;
+
+  const BRACKETS = {
+    single: [{ max:49450, ltcg:0 }, { max:545500, ltcg:15 }, { max:Infinity, ltcg:20 }],
+    mfj:    [{ max:98900, ltcg:0 }, { max:613700, ltcg:15 }, { max:Infinity, ltcg:20 }],
+  };
+  const NIIT_THRESHOLD = { single: 200000, mfj: 250000 };
+  const MAX_INCOME = 700000;
+
+  const SEGS_DARK = [
+    { label:'0% LTCG',  color:'#1a5c3a', textColor:'#6ddba0' },
+    { label:'15% LTCG', color:'#1a3a6a', textColor:'#8ab8f0' },
+    { label:'20% LTCG', color:'#5c1a1a', textColor:'#f08a8a' },
+  ];
+  const SEGS_LIGHT = [
+    { label:'0% LTCG',  color:'#1D9E75', textColor:'#085041' },
+    { label:'15% LTCG', color:'#3266ad', textColor:'#E6F1FB' },
+    { label:'20% LTCG', color:'#A32D2D', textColor:'#FCEBEB' },
+  ];
+
+  function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+  function fmtPct(n) { return (+n).toFixed(1) + '%'; }
+  function fmtIncome(n) {
+    if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+    if (n >= 1000)    return '$' + (n/1000).toFixed(0) + 'K';
+    return '$' + n;
+  }
+
+  function getTaxInfo(income) {
+    const brackets = BRACKETS[filing];
+    const niitThresh = NIIT_THRESHOLD[filing];
+    let ltcgRate = 0;
+    for (const b of brackets) { if (income <= b.max) { ltcgRate = b.ltcg; break; } }
+    const niit = income > niitThresh ? 3.8 : 0;
+    return { ltcgRate, niit, total: ltcgRate + niit };
+  }
+
+  function setFiling(f) {
+    filing = f;
+    $('tab-single').className = 'ftab' + (f === 'single' ? ' active' : '');
+    $('tab-mfj').className    = 'ftab' + (f === 'mfj'    ? ' active' : '');
+    update();
+  }
+
+  function setSlider(id, val) { $(id).value = val; update(); }
+
+  function updateBracketBar(income, taxInfo) {
+    const brackets = BRACKETS[filing];
+    const niitThresh = NIIT_THRESHOLD[filing];
+    const segs = (isDark ? SEGS_DARK : SEGS_LIGHT).map((s, i) => ({
+      ...s, end: i === 0 ? brackets[0].max : i === 1 ? brackets[1].max : MAX_INCOME
+    }));
+    let html = '';
+    for (let i = 0; i < segs.length; i++) {
+      const seg = segs[i];
+      const start = i === 0 ? 0 : segs[i-1].end;
+      const pct = ((Math.min(seg.end, MAX_INCOME) - start) / MAX_INCOME * 100).toFixed(1);
+      const active = income > start && income <= seg.end;
+      const past   = income > seg.end;
+      const opacity = past ? 0.45 : active ? 1 : 0.22;
+      html += `<div class="bracket-seg" style="flex:${pct};background:${seg.color};opacity:${opacity};color:${seg.textColor};">${pct > 10 ? seg.label : ''}</div>`;
+    }
+    $('bracketBar').innerHTML = html;
+
+    const bounds = filing === 'single'
+      ? ['$0', '$49,450', '$545,500', '$545,500+']
+      : ['$0', '$98,900', '$613,700', '$613,700+'];
+    const idx = income <= brackets[0].max ? 0 : income <= brackets[1].max ? 1 : 2;
+    const names  = ['0%', '15%', '20%'];
+    const ranges = [`${bounds[0]}–${bounds[1]}`, `${bounds[1]}–${bounds[2]}`, bounds[3]];
+    const niitApplies = income > niitThresh;
+    const niitStr = niitApplies
+      ? ` + <strong>3.8% NIIT</strong> (income &gt; ${fmtIncome(niitThresh)}) = <strong>${fmtPct(taxInfo.total)} effective</strong>`
+      : ` — no NIIT (below ${fmtIncome(niitThresh)}) = <strong>${fmtPct(taxInfo.total)} effective</strong>`;
+    $('bracketDetail').innerHTML = `Income ${fmtIncome(income)}: <strong>${names[idx]} long-term capital gains</strong> (${ranges[idx]})${niitStr}`;
+  }
+
+  function compute() {
+    const p = +$('principal').value, r = +$('rate').value / 100;
+    const y = +$('years').value,     m = +$('monthly').value;
+    const inf = +$('inflation').value / 100, income = +$('income').value;
+    const txR = getTaxInfo(income).total / 100;
+    const labels=[], nominals=[], afterTaxes=[], reals=[], invested=[];
+    for (let yr = 0; yr <= y; yr++) {
+      const nom = p * Math.pow(1+r, yr) + (m === 0 ? 0 : m*12*(Math.pow(1+r,yr)-1)/r);
+      const inv = p + m*12*yr;
+      const afterTax = nom - Math.max(0, nom - inv) * txR;
+      labels.push(yr === 0 ? 'Now' : `Yr ${yr}`);
+      nominals.push(Math.round(nom));
+      afterTaxes.push(Math.round(afterTax));
+      reals.push(Math.round(afterTax / Math.pow(1+inf, yr)));
+      invested.push(Math.round(inv));
+    }
+    return { labels, nominals, afterTaxes, reals, invested };
+  }
+
+  function getChartColors() {
+    return isDark
+      ? { nom:'#5a8fd4', nomBg:'rgba(90,143,212,0.10)',  at:'#666460', atBg:'rgba(100,100,96,0.07)',  real:'#3daa80', realBg:'rgba(61,170,128,0.10)',  inv:'#3a5a7a', invBg:'rgba(58,90,122,0.08)',   grid:'rgba(255,255,255,0.06)', tick:'#555' }
+      : { nom:'#3266ad', nomBg:'rgba(50,102,173,0.08)',   at:'#888780', atBg:'rgba(136,135,128,0.05)', real:'#1D9E75', realBg:'rgba(29,158,117,0.10)',  inv:'#9ab8d8', invBg:'rgba(180,210,240,0.05)', grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
+  }
+
+  function updateChartTheme() {
+    if (!chart) return;
+    const c = getChartColors();
+    chart.data.datasets[0].borderColor = c.nom;  chart.data.datasets[0].backgroundColor = c.nomBg;
+    chart.data.datasets[1].borderColor = c.at;   chart.data.datasets[1].backgroundColor = c.atBg;
+    chart.data.datasets[2].borderColor = c.real; chart.data.datasets[2].backgroundColor = c.realBg;
+    chart.data.datasets[3].borderColor = c.inv;  chart.data.datasets[3].backgroundColor = c.invBg;
+    chart.options.scales.x.ticks.color = c.tick;
+    chart.options.scales.y.ticks.color = c.tick;
+    chart.options.scales.y.grid.color  = c.grid;
+    chart.options.plugins.tooltip.backgroundColor = isDark ? '#1a1a17' : '#fff';
+    chart.options.plugins.tooltip.borderColor     = isDark ? '#333'    : 'rgba(0,0,0,0.12)';
+    chart.options.plugins.tooltip.titleColor      = isDark ? '#c8c4bc' : '#111';
+    chart.options.plugins.tooltip.bodyColor       = isDark ? '#9a9890' : '#666';
+    chart.update('none');
+  }
+
+  function update() {
+    const income = +$('income').value;
+    $('principalVal').textContent = fmt(+$('principal').value);
+    $('rateVal').textContent      = $('rate').value + '%';
+    $('yearsVal').textContent     = $('years').value + ' yrs';
+    $('monthlyVal').textContent   = fmt(+$('monthly').value);
+    $('inflationVal').textContent = fmtPct(+$('inflation').value);
+    $('incomeVal').textContent    = fmtIncome(income);
+
+    const taxInfo = getTaxInfo(income);
+    updateBracketBar(income, taxInfo);
+
+    const { labels, nominals, afterTaxes, reals, invested } = compute();
+    const n = labels.length - 1;
+    $('sNominal').textContent  = fmt(nominals[n]);
+    $('sAfterTax').textContent = fmt(afterTaxes[n]);
+    $('sReal').textContent     = fmt(reals[n]);
+    $('sDrag').textContent     = fmt(nominals[n] - reals[n]);
+
+    if (chart) {
+      const step = Math.max(1, Math.floor(labels.length / 12));
+      const fl = arr => arr.filter((_, i) => i % step === 0 || i === arr.length - 1);
+      chart.data.labels           = fl(labels);
+      chart.data.datasets[0].data = fl(nominals);
+      chart.data.datasets[1].data = fl(afterTaxes);
+      chart.data.datasets[2].data = fl(reals);
+      chart.data.datasets[3].data = fl(invested);
+      chart.update('none');
+    }
+  }
+
+  function initChart() {
+    const { labels, nominals, afterTaxes, reals, invested } = compute();
+    const step = Math.max(1, Math.floor(labels.length / 12));
+    const fl = arr => arr.filter((_, i) => i % step === 0 || i === arr.length - 1);
+    const c = getChartColors();
+    chart = new Chart($('ciChart'), {
+      type: 'line',
+      data: {
+        labels: fl(labels),
+        datasets: [
+          { label:'Nominal',        data:fl(nominals),   borderColor:c.nom,  backgroundColor:c.nomBg,  fill:true, tension:0.3, pointRadius:2, borderWidth:2 },
+          { label:'After-tax',      data:fl(afterTaxes), borderColor:c.at,   backgroundColor:c.atBg,   fill:true, tension:0.3, pointRadius:2, borderWidth:1.5, borderDash:[5,3] },
+          { label:'Real after-tax', data:fl(reals),      borderColor:c.real, backgroundColor:c.realBg, fill:true, tension:0.3, pointRadius:2, borderWidth:2 },
+          { label:'Invested',       data:fl(invested),   borderColor:c.inv,  backgroundColor:c.invBg,  fill:true, tension:0,   pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1a1a17', borderColor: '#333', borderWidth: 0.5,
+            titleColor: '#c8c4bc', bodyColor: '#9a9890',
+            callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + fmt(ctx.parsed.y) },
+          },
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: c.tick } },
+          y: {
+            ticks: { callback: v => '$' + (v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : v), font: { size: 11 }, color: c.tick },
+            grid: { color: c.grid },
+          },
+        },
+      },
+    });
+  }
+
+  $('themeToggle').addEventListener('change', function () {
+    isDark = this.checked;
+    document.body.className = isDark ? 'dark' : 'light';
+    updateChartTheme();
+    updateBracketBar(+$('income').value, getTaxInfo(+$('income').value));
+  });
+
+  ['principal','rate','years','monthly','inflation','income'].forEach(id => $(id).addEventListener('input', update));
+  initChart();
+  update();
+</script>
+
+
+</body></html>
