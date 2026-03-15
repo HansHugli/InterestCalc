@@ -149,7 +149,7 @@
     <span><span class="leg-dot" style="background:#6ea8f0;"></span>Nominal balance</span>
     <span><span class="leg-dot" style="background:#b0a0d0;border:0.5px dashed #c4b8e0;"></span>After-tax nominal</span>
     <span><span class="leg-dot" style="background:#50d4a0;"></span>Real after-tax</span>
-    <span><span class="leg-dot" style="background:#a0a0a0;border:0.5px dashed #c0c0c0;"></span>Amount invested</span>
+    <span><span class="leg-dot" style="background:#c49070;border:0.5px dashed #d4a888;"></span>Amount invested</span>
     <span><span class="leg-dot" style="background:#f0c050;"></span>Yield</span>
   </div>
 
@@ -262,8 +262,8 @@
 
   function getChartColors() {
     return isDark
-      ? { nom:'#6ea8f0', nomBg:'rgba(110,168,240,0.10)', at:'#b0a0d0', atBg:'rgba(176,160,208,0.07)', real:'#50d4a0', realBg:'rgba(80,212,160,0.10)',  inv:'#a0a0a0', invBg:'rgba(160,160,160,0.08)', yld:'#f0c050', yldBg:'rgba(240,192,80,0.10)',  grid:'rgba(255,255,255,0.06)', tick:'#555' }
-      : { nom:'#2a6ecf', nomBg:'rgba(42,110,207,0.08)',  at:'#7b5ea7', atBg:'rgba(123,94,167,0.07)',  real:'#18a06a', realBg:'rgba(24,160,106,0.10)', inv:'#777777', invBg:'rgba(119,119,119,0.05)', yld:'#c89520', yldBg:'rgba(200,149,32,0.10)',  grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
+      ? { nom:'#6ea8f0', nomBg:'rgba(110,168,240,0.10)', at:'#b0a0d0', atBg:'rgba(176,160,208,0.07)', real:'#50d4a0', realBg:'rgba(80,212,160,0.10)',  inv:'#c49070', invBg:'rgba(196,144,112,0.08)', yld:'#f0c050', yldBg:'rgba(240,192,80,0.10)',  grid:'rgba(255,255,255,0.06)', tick:'#555' }
+      : { nom:'#2a6ecf', nomBg:'rgba(42,110,207,0.08)',  at:'#7b5ea7', atBg:'rgba(123,94,167,0.07)',  real:'#18a06a', realBg:'rgba(24,160,106,0.10)', inv:'#a06840', invBg:'rgba(160,104,64,0.05)',  yld:'#c89520', yldBg:'rgba(200,149,32,0.10)',  grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
   }
 
   function updateChartTheme() {
