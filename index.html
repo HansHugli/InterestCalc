@@ -85,12 +85,12 @@
     </div>
     <div class="ctrl">
       <span class="ctrl-label">Annual return</span>
-      <input type="range" id="rate" min="1" max="20" step="0.5" value="7">
+      <input type="range" id="rate" min="1" max="20" step="0.5" value="4.5">
       <span class="ctrl-val" id="rateVal">7%</span>
     </div>
     <div class="ctrl">
       <span class="ctrl-label">Years</span>
-      <input type="range" id="years" min="1" max="50" step="1" value="20">
+      <input type="range" id="years" min="1" max="50" step="1" value="10">
       <span class="ctrl-val" id="yearsVal">20 yrs</span>
     </div>
     <div class="ctrl">
@@ -110,7 +110,7 @@
       <div class="section-box">
         <div class="ctrl">
           <span class="ctrl-label" style="color:var(--accent-inf);">Inflation rate</span>
-          <input type="range" id="inflation" min="0" max="10" step="0.1" value="3.1" style="accent-color:var(--accent-inf);">
+          <input type="range" id="inflation" min="0" max="10" step="0.1" value="0" style="accent-color:var(--accent-inf);">
           <span class="ctrl-val" id="inflationVal" style="color:var(--accent-inf);">3.1%</span>
         </div>
       </div>
@@ -127,7 +127,7 @@
       </div>
       <div class="ctrl">
         <span class="ctrl-label" style="color:var(--accent-inc);">Annual income</span>
-        <input type="range" id="income" min="0" max="700000" step="5000" value="300000" style="accent-color:var(--accent-inc);">
+        <input type="range" id="income" min="0" max="700000" step="5000" value="45000" style="accent-color:var(--accent-inc);">
         <span class="ctrl-val" id="incomeVal" style="color:var(--accent-inc);">$300K</span>
       </div>
       <div style="margin-top:10px;">
@@ -142,6 +142,7 @@
     <div class="stat"><div class="stat-lbl">After-tax balance</div><div class="stat-val" id="sAfterTax" style="color:var(--text);">$33,302</div></div>
     <div class="stat"><div class="stat-lbl">Real after-tax value</div><div class="stat-val" id="sReal" style="color:#3daa80;">$18,084</div></div>
     <div class="stat"><div class="stat-lbl">Tax + inflation drag</div><div class="stat-val" id="sDrag" style="color:#c05050;">$20,613</div></div>
+    <div class="stat" style="grid-column:span 2;"><div class="stat-lbl">Real after-tax yield <span style="font-size:10px;color:var(--text3);" id="sYieldPeriod">(20 yr)</span></div><div class="stat-val" id="sYield" style="color:#3daa80;">$0</div></div>
   </div>
 
   <div class="legend">
@@ -149,6 +150,7 @@
     <span><span class="leg-dot" style="background:#888;border:0.5px dashed #aaa;"></span>After-tax nominal</span>
     <span><span class="leg-dot" style="background:#3daa80;"></span>Real after-tax</span>
     <span><span class="leg-dot" style="background:#7a9ab8;border:0.5px dashed #9ab8d8;"></span>Amount invested</span>
+    <span><span class="leg-dot" style="background:#d4a85a;"></span>Yield</span>
   </div>
 
   <div class="chart-wrap">
@@ -242,24 +244,26 @@
     const y = +$('years').value,     m = +$('monthly').value;
     const inf = +$('inflation').value / 100, income = +$('income').value;
     const txR = getTaxInfo(income).total / 100;
-    const labels=[], nominals=[], afterTaxes=[], reals=[], invested=[];
+    const labels=[], nominals=[], afterTaxes=[], reals=[], invested=[], yields=[];
     for (let yr = 0; yr <= y; yr++) {
       const nom = p * Math.pow(1+r, yr) + (m === 0 ? 0 : m*12*(Math.pow(1+r,yr)-1)/r);
       const inv = p + m*12*yr;
       const afterTax = nom - Math.max(0, nom - inv) * txR;
+      const realVal = Math.round(afterTax / Math.pow(1+inf, yr));
       labels.push(yr === 0 ? 'Now' : `Yr ${yr}`);
       nominals.push(Math.round(nom));
       afterTaxes.push(Math.round(afterTax));
-      reals.push(Math.round(afterTax / Math.pow(1+inf, yr)));
+      reals.push(realVal);
       invested.push(Math.round(inv));
+      yields.push(realVal - Math.round(inv));
     }
-    return { labels, nominals, afterTaxes, reals, invested };
+    return { labels, nominals, afterTaxes, reals, invested, yields };
   }
 
   function getChartColors() {
     return isDark
-      ? { nom:'#5a8fd4', nomBg:'rgba(90,143,212,0.10)',  at:'#666460', atBg:'rgba(100,100,96,0.07)',  real:'#3daa80', realBg:'rgba(61,170,128,0.10)',  inv:'#3a5a7a', invBg:'rgba(58,90,122,0.08)',   grid:'rgba(255,255,255,0.06)', tick:'#555' }
-      : { nom:'#3266ad', nomBg:'rgba(50,102,173,0.08)',   at:'#888780', atBg:'rgba(136,135,128,0.05)', real:'#1D9E75', realBg:'rgba(29,158,117,0.10)',  inv:'#9ab8d8', invBg:'rgba(180,210,240,0.05)', grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
+      ? { nom:'#5a8fd4', nomBg:'rgba(90,143,212,0.10)',  at:'#666460', atBg:'rgba(100,100,96,0.07)',  real:'#3daa80', realBg:'rgba(61,170,128,0.10)',  inv:'#3a5a7a', invBg:'rgba(58,90,122,0.08)',   yld:'#d4a85a', yldBg:'rgba(212,168,90,0.10)',  grid:'rgba(255,255,255,0.06)', tick:'#555' }
+      : { nom:'#3266ad', nomBg:'rgba(50,102,173,0.08)',   at:'#888780', atBg:'rgba(136,135,128,0.05)', real:'#1D9E75', realBg:'rgba(29,158,117,0.10)',  inv:'#9ab8d8', invBg:'rgba(180,210,240,0.05)', yld:'#b8860b', yldBg:'rgba(184,134,11,0.10)', grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
   }
 
   function updateChartTheme() {
@@ -269,6 +273,7 @@
     chart.data.datasets[1].borderColor = c.at;   chart.data.datasets[1].backgroundColor = c.atBg;
     chart.data.datasets[2].borderColor = c.real; chart.data.datasets[2].backgroundColor = c.realBg;
     chart.data.datasets[3].borderColor = c.inv;  chart.data.datasets[3].backgroundColor = c.invBg;
+    chart.data.datasets[4].borderColor = c.yld;  chart.data.datasets[4].backgroundColor = c.yldBg;
     chart.options.scales.x.ticks.color = c.tick;
     chart.options.scales.y.ticks.color = c.tick;
     chart.options.scales.y.grid.color  = c.grid;
@@ -291,12 +296,14 @@
     const taxInfo = getTaxInfo(income);
     updateBracketBar(income, taxInfo);
 
-    const { labels, nominals, afterTaxes, reals, invested } = compute();
+    const { labels, nominals, afterTaxes, reals, invested, yields } = compute();
     const n = labels.length - 1;
     $('sNominal').textContent  = fmt(nominals[n]);
     $('sAfterTax').textContent = fmt(afterTaxes[n]);
     $('sReal').textContent     = fmt(reals[n]);
     $('sDrag').textContent     = fmt(nominals[n] - reals[n]);
+    $('sYield').textContent    = fmt(reals[n] - invested[n]);
+    $('sYieldPeriod').textContent = `(${n} yr)`;
 
     if (chart) {
       const step = Math.max(1, Math.floor(labels.length / 12));
@@ -306,12 +313,13 @@
       chart.data.datasets[1].data = fl(afterTaxes);
       chart.data.datasets[2].data = fl(reals);
       chart.data.datasets[3].data = fl(invested);
+      chart.data.datasets[4].data = fl(yields);
       chart.update('none');
     }
   }
 
   function initChart() {
-    const { labels, nominals, afterTaxes, reals, invested } = compute();
+    const { labels, nominals, afterTaxes, reals, invested, yields } = compute();
     const step = Math.max(1, Math.floor(labels.length / 12));
     const fl = arr => arr.filter((_, i) => i % step === 0 || i === arr.length - 1);
     const c = getChartColors();
@@ -324,6 +332,7 @@
           { label:'After-tax',      data:fl(afterTaxes), borderColor:c.at,   backgroundColor:c.atBg,   fill:true, tension:0.3, pointRadius:2, borderWidth:1.5, borderDash:[5,3] },
           { label:'Real after-tax', data:fl(reals),      borderColor:c.real, backgroundColor:c.realBg, fill:true, tension:0.3, pointRadius:2, borderWidth:2 },
           { label:'Invested',       data:fl(invested),   borderColor:c.inv,  backgroundColor:c.invBg,  fill:true, tension:0,   pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+          { label:'Yield',          data:fl(yields),     borderColor:c.yld,  backgroundColor:c.yldBg,  fill:true, tension:0.3, pointRadius:2, borderWidth:2 },
         ],
       },
       options: {
