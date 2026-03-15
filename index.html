@@ -138,19 +138,19 @@
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="stat-lbl">Nominal balance</div><div class="stat-val" id="sNominal" style="color:#5a8fd4;">$38,697</div></div>
+    <div class="stat"><div class="stat-lbl">Nominal balance</div><div class="stat-val" id="sNominal" style="color:#6ea8f0;">$38,697</div></div>
     <div class="stat"><div class="stat-lbl">After-tax balance</div><div class="stat-val" id="sAfterTax" style="color:var(--text);">$33,302</div></div>
-    <div class="stat"><div class="stat-lbl">Real after-tax value</div><div class="stat-val" id="sReal" style="color:#3daa80;">$18,084</div></div>
+    <div class="stat"><div class="stat-lbl">Real after-tax value</div><div class="stat-val" id="sReal" style="color:#50d4a0;">$18,084</div></div>
     <div class="stat"><div class="stat-lbl">Tax + inflation drag</div><div class="stat-val" id="sDrag" style="color:#c05050;">$20,613</div></div>
-    <div class="stat" style="grid-column:span 2;"><div class="stat-lbl">Real after-tax yield <span style="font-size:10px;color:var(--text3);" id="sYieldPeriod">(20 yr)</span></div><div class="stat-val" id="sYield" style="color:#3daa80;">$0</div></div>
+    <div class="stat" style="grid-column:span 2;"><div class="stat-lbl">Real after-tax yield <span style="font-size:10px;color:var(--text3);" id="sYieldPeriod">(20 yr)</span></div><div class="stat-val" id="sYield" style="color:#f0c050;">$0</div></div>
   </div>
 
   <div class="legend">
-    <span><span class="leg-dot" style="background:#5a8fd4;"></span>Nominal balance</span>
-    <span><span class="leg-dot" style="background:#888;border:0.5px dashed #aaa;"></span>After-tax nominal</span>
-    <span><span class="leg-dot" style="background:#3daa80;"></span>Real after-tax</span>
-    <span><span class="leg-dot" style="background:#7a9ab8;border:0.5px dashed #9ab8d8;"></span>Amount invested</span>
-    <span><span class="leg-dot" style="background:#d4a85a;"></span>Yield</span>
+    <span><span class="leg-dot" style="background:#6ea8f0;"></span>Nominal balance</span>
+    <span><span class="leg-dot" style="background:#b0a0d0;border:0.5px dashed #c4b8e0;"></span>After-tax nominal</span>
+    <span><span class="leg-dot" style="background:#50d4a0;"></span>Real after-tax</span>
+    <span><span class="leg-dot" style="background:#a0a0a0;border:0.5px dashed #c0c0c0;"></span>Amount invested</span>
+    <span><span class="leg-dot" style="background:#f0c050;"></span>Yield</span>
   </div>
 
   <div class="chart-wrap">
@@ -262,8 +262,8 @@
 
   function getChartColors() {
     return isDark
-      ? { nom:'#5a8fd4', nomBg:'rgba(90,143,212,0.10)',  at:'#666460', atBg:'rgba(100,100,96,0.07)',  real:'#3daa80', realBg:'rgba(61,170,128,0.10)',  inv:'#3a5a7a', invBg:'rgba(58,90,122,0.08)',   yld:'#d4a85a', yldBg:'rgba(212,168,90,0.10)',  grid:'rgba(255,255,255,0.06)', tick:'#555' }
-      : { nom:'#3266ad', nomBg:'rgba(50,102,173,0.08)',   at:'#888780', atBg:'rgba(136,135,128,0.05)', real:'#1D9E75', realBg:'rgba(29,158,117,0.10)',  inv:'#9ab8d8', invBg:'rgba(180,210,240,0.05)', yld:'#b8860b', yldBg:'rgba(184,134,11,0.10)', grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
+      ? { nom:'#6ea8f0', nomBg:'rgba(110,168,240,0.10)', at:'#b0a0d0', atBg:'rgba(176,160,208,0.07)', real:'#50d4a0', realBg:'rgba(80,212,160,0.10)',  inv:'#a0a0a0', invBg:'rgba(160,160,160,0.08)', yld:'#f0c050', yldBg:'rgba(240,192,80,0.10)',  grid:'rgba(255,255,255,0.06)', tick:'#555' }
+      : { nom:'#2a6ecf', nomBg:'rgba(42,110,207,0.08)',  at:'#7b5ea7', atBg:'rgba(123,94,167,0.07)',  real:'#18a06a', realBg:'rgba(24,160,106,0.10)', inv:'#777777', invBg:'rgba(119,119,119,0.05)', yld:'#c89520', yldBg:'rgba(200,149,32,0.10)',  grid:'rgba(0,0,0,0.07)',        tick:'#aaa' };
   }
 
   function updateChartTheme() {
@@ -306,8 +306,7 @@
     $('sYieldPeriod').textContent = `(${n} yr)`;
 
     if (chart) {
-      const step = Math.max(1, Math.floor(labels.length / 12));
-      const fl = arr => arr.filter((_, i) => i % step === 0 || i === arr.length - 1);
+      const fl = arr => arr;
       chart.data.labels           = fl(labels);
       chart.data.datasets[0].data = fl(nominals);
       chart.data.datasets[1].data = fl(afterTaxes);
